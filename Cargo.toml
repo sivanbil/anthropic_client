@@ -1,0 +1,17 @@
+[package]
+name = "anthropic_client"
+version = "0.1.4"
+edition = "2021"
+authors = ["sivanliaobil@gmail.com"]
+license = "MIT"
+description = "A library for interacting with the Anthropic API"
+repository = "https://github.com/sivanbil/anthropic_client.git"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+serde_json = "1.0"
+dotenv = "0.15.0"
+base64 = "0.21.0"
+tokio = { version = "1.0", features = ["full"] }
