@@ -9,7 +9,7 @@ Add the following to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-anthropic_client = "0.1.4"
+anthropic_client = "1.0.0"
 ```
 
 ## Usage
@@ -20,12 +20,22 @@ Here's a simple example of how to use the `anthropic_client` crate to send a req
 use anthropic_client::send_test_request;
 
 fn main() {
-    let content = "Hello, Anthropic!";
+    let content = "Hello, Anthropic! My name is sivanliao.";
     let model = "claude-3-opus-20240229";
-
-    match send_text_request(content, model) {
-        Ok(response) => println!("Response: {}", response),
-        Err(e) => eprintln!("Error: {}", e),
+    let anthropic_client = Anthropic::new();
+    let messages = vec![
+        json!({"role": "user", "content": content}),
+    ];
+    match anthropic_client.messages.create(&anthropic_client, model, 1024, &messages) {
+        Ok(response) => {
+            println!("{:?}", response);
+            // Assert the response or perform other checks
+            assert!(!response.is_empty());
+        }
+        Err(error) => {
+            // Handle the error case
+            panic!("Error: {}", error);
+        }
     }
 }
 ```
@@ -35,13 +45,29 @@ Image example
 use anthropic_client::send_image_request;
 
 fn main() {
-    let image_url = "https://example.com/image.jpg";
+    let image_url = "https://imagepphcloud.thepaper.cn/pph/image/300/508/637.jpg";
     let image_media_type = "image/jpeg";
     let model = "claude-3-opus-20240229";
+    let anthropic_client = Anthropic::new();
+    let messages = Anthropic::pack_vision_content(image_url.parse().unwrap(), image_media_type);
 
-    match send_image_request(image_url, image_media_type, model) {
-        Ok(response) => println!("Response: {}", response),
-        Err(e) => eprintln!("Error: {}", e),
+    match messages {
+        Ok(pack_messages) => {
+            match anthropic_client.messages.create(&anthropic_client, model, 1024, &pack_messages) {
+                Ok(response) => {
+                    println!("{:?}", response);
+                    // Assert the response or perform other checks
+                    assert!(!response.is_empty());
+                }
+                Err(error) => {
+                    // Handle the error case
+                    panic!("Error: {}", error);
+                }
+            }
+        }
+        Err(error) => {
+            panic!("Error: {}", error);
+        }
     }
 }
 ```
@@ -54,16 +80,6 @@ ANTHROPIC_API_URL=https://api.anthropic.com/v1/messages
 ANTHROPIC_API_VERSION=2023-06-01
 ANTHROPIC_API_KEY=xxxxxxxx
 ```
-
-
-## API
-
-### `send_request(content: &str) -> Result<String, Box<dyn std::error::Error>>`
-
-Sends a request to the Anthropic API with the provided content and returns the response as a `String`.
-
-- `content`: The content to send to the Anthropic API.
-- Returns: A `Result` containing the response string on success, or an error on failure.
 
 ## License
 
